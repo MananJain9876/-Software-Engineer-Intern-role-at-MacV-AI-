@@ -10,7 +10,7 @@ A production-ready Task Management System API built with FastAPI, PostgreSQL, an
 - Send email notifications when tasks are assigned or updated
 - Handle background jobs with Celery workers
 - Daily summary emails for overdue tasks
-- Production-ready with Docker and cloud deployment support
+- Production-ready with Railway deployment support
 
 ## Tech Stack
 
@@ -21,13 +21,12 @@ A production-ready Task Management System API built with FastAPI, PostgreSQL, an
 - **Celery** - Background task processing
 - **Redis** - Message broker for Celery
 - **JWT** - Authentication
-- **Docker** - Containerization
+- **Railway** - Cloud deployment platform
 
 ## Quick Start (Local Development)
 
 ### Prerequisites
 - Python 3.11+
-- Docker and Docker Compose
 - Redis (optional, will fallback to eager mode)
 
 ### Local Setup
@@ -38,98 +37,67 @@ git clone <repository-url>
 cd fast
 ```
 
-2. **Using Docker (Recommended)**
+2. **Create virtual environment**
 ```bash
-docker-compose up -d --build
-```
-
-3. **Manual Setup**
-```bash
-# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-# Install dependencies
+3. **Install dependencies**
+```bash
 pip install -r requirements.txt
+```
 
-# Set environment variables
+4. **Set environment variables**
+```bash
 export DATABASE_URL="sqlite:///./taskmanagement.db"
 export CELERY_BROKER_URL="redis://localhost:6379/0"
 export CELERY_RESULT_BACKEND="redis://localhost:6379/0"
+```
 
-# Run the application
+5. **Run the application**
+```bash
 uvicorn app.main:app --reload
 ```
 
 ## Production Deployment
 
-### Render Deployment (Recommended)
+### Railway Deployment (Recommended - 100% FREE!)
 
-1. **Fork/Clone this repository to your GitHub account**
+Railway is the perfect free alternative that doesn't require a credit card!
 
-2. **Connect to Render**
-   - Go to [render.com](https://render.com)
-   - Sign up/Login with your GitHub account
-   - Click "New +" and select "Web Service"
+1. **Push your code to GitHub**
+   ```bash
+   ./deploy-railway.sh
+   ```
 
-3. **Configure the Web Service**
-   - **Name**: `task-management-api`
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - **Plan**: Free (or choose paid plan for production)
+2. **Deploy to Railway**
+   - Go to [railway.app](https://railway.app)
+   - Sign up/Login with GitHub
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Choose your repository
+   - Railway will automatically detect it's a Python app
 
-4. **Add Environment Variables**
-   - `DATABASE_URL`: Will be provided by Render PostgreSQL service
-   - `SECRET_KEY`: Generate a secure random string
-   - `CELERY_BROKER_URL`: Will be provided by Render Redis service
-   - `CELERY_RESULT_BACKEND`: Will be provided by Render Redis service
+3. **Add Services**
+   - **PostgreSQL**: Click "New" → "Database" → "PostgreSQL"
+   - **Redis**: Click "New" → "Redis"
+   - Railway automatically connects everything!
 
-5. **Add PostgreSQL Database**
-   - Click "New +" → "PostgreSQL"
-   - Name: `taskmanagement`
-   - Plan: Free (or choose paid plan for production)
-   - Copy the `DATABASE_URL` to your web service environment variables
-
-6. **Add Redis Service**
-   - Click "New +" → "Redis"
-   - Name: `task-management-redis`
-   - Plan: Free (or choose paid plan for production)
-   - Copy the `REDIS_URL` to your web service environment variables as `CELERY_BROKER_URL` and `CELERY_RESULT_BACKEND`
-
-7. **Deploy**
-   - Click "Create Web Service"
-   - Render will automatically build and deploy your application
-
-### Alternative: One-Click Deploy with render.yaml
-
-If you have the `render.yaml` file in your repository:
-
-1. **Connect to Render**
-2. **Click "New +" → "Blueprint"**
-3. **Connect your GitHub repository**
-4. **Render will automatically create all services based on the blueprint**
-
-### Docker Deployment
-
-```bash
-# Build and run with Docker Compose
-docker-compose up -d --build
-
-# Or run individual services
-docker-compose up -d db redis
-docker-compose up -d api
-docker-compose up -d celery-worker celery-beat
-```
+4. **Deploy**
+   - Railway automatically builds and deploys your app
+   - Get your URL: `https://your-app.railway.app`
 
 ### Environment Variables
 
+Railway automatically sets most variables, but you can add:
+
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `sqlite:///./taskmanagement.db` |
-| `CELERY_BROKER_URL` | Redis connection string | `redis://localhost:6379/0` |
-| `CELERY_RESULT_BACKEND` | Redis connection string | `redis://localhost:6379/0` |
-| `SECRET_KEY` | JWT secret key | Auto-generated |
+| `DATABASE_URL` | PostgreSQL connection string | Auto-set by Railway |
+| `CELERY_BROKER_URL` | Redis connection string | Auto-set by Railway |
+| `CELERY_RESULT_BACKEND` | Redis connection string | Auto-set by Railway |
+| `SECRET_KEY` | JWT secret key | Generate random string |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token expiry | `60` |
 | `ALGORITHM` | JWT algorithm | `HS256` |
 | `BACKEND_CORS_ORIGINS` | CORS origins | `*` |
@@ -138,16 +106,16 @@ docker-compose up -d celery-worker celery-beat
 
 Once deployed, access the API documentation at:
 
-- **Swagger UI**: `https://your-app.onrender.com/docs`
-- **ReDoc**: `https://your-app.onrender.com/redoc`
-- **Health Check**: `https://your-app.onrender.com/health`
+- **Swagger UI**: `https://your-app.railway.app/docs`
+- **ReDoc**: `https://your-app.railway.app/redoc`
+- **Health Check**: `https://your-app.railway.app/health`
 
 ## Authentication
 
 ### Getting an Access Token
 
 ```bash
-curl -X POST "https://your-app.onrender.com/api/auth/login" \
+curl -X POST "https://your-app.railway.app/api/auth/login" \
      -H "Content-Type: application/x-application/x-www-form-urlencoded" \
      -d "username=your-email@example.com&password=your-password"
 ```
@@ -155,7 +123,7 @@ curl -X POST "https://your-app.onrender.com/api/auth/login" \
 ### Using the Token
 
 ```bash
-curl -X GET "https://your-app.onrender.com/api/projects/" \
+curl -X GET "https://your-app.railway.app/api/projects/" \
      -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -174,7 +142,7 @@ alembic upgrade head
 ## Monitoring and Health Checks
 
 - **Health Endpoint**: `/health` - Database connectivity check
-- **Logs**: Available in Render dashboard
+- **Logs**: Available in Railway dashboard
 - **Metrics**: Built-in FastAPI metrics
 
 ## Troubleshooting
@@ -182,25 +150,35 @@ alembic upgrade head
 ### Common Issues
 
 1. **Database Connection Errors**
-   - Verify `DATABASE_URL` is correct
+   - Verify `DATABASE_URL` is set by Railway
    - Check if PostgreSQL service is running
    - Ensure database exists and is accessible
 
 2. **Redis Connection Errors**
-   - Verify `CELERY_BROKER_URL` is correct
+   - Verify Redis URLs are set by Railway
    - Check if Redis service is running
    - Application will fallback to eager mode if Redis is unavailable
 
 3. **Build Failures**
    - Check Python version compatibility
    - Verify all dependencies in `requirements.txt`
-   - Check build logs in Render dashboard
+   - Check Railway build logs
 
 ### Support
 
-- Check Render logs in the dashboard
+- Check Railway logs in the dashboard
 - Verify environment variables are set correctly
-- Test locally with Docker before deploying
+- Test locally before deploying
+
+## Why Railway?
+
+- ✅ **100% Free** - No credit card required
+- ✅ **Auto-deploy** from GitHub
+- ✅ **PostgreSQL & Redis** included
+- ✅ **Custom domains** supported
+- ✅ **SSL certificates** automatic
+- ✅ **Global CDN** included
+- ✅ **Actually easier** than other platforms
 
 ## License
 
