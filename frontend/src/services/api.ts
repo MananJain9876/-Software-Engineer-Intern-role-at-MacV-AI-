@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://software-engineer-intern-role-at-macv-ai-production.up.railway.app/';
 
 const api = axios.create({
   baseURL: API_URL,
