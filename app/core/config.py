@@ -2,7 +2,7 @@ import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, EmailStr, validator
+from pydantic import AnyHttpUrl, EmailStr, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # e.g: "http://localhost:8000,http://localhost:3000"
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def validate_backend_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
