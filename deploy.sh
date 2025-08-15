@@ -28,7 +28,7 @@ echo "✅ Git repository configured"
 echo "📤 Pushing to GitHub..."
 git add .
 git commit -m "Deploy to production $(date)"
-git push origin main
+git push origin master
 
 echo ""
 echo "🎉 Code pushed to GitHub successfully!"
@@ -47,5 +47,6 @@ echo "6. Add environment variables (see README.md for details)"
 echo "7. Click 'Create Web Service'"
 echo ""
 echo "🔗 Alternative: Use the render.yaml blueprint for one-click deployment!"
+echo "   Note: Your repository uses 'master' branch (not 'main')"
 echo ""
 echo "📚 For detailed instructions, see README.md"
