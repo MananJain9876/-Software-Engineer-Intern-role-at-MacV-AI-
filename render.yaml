@@ -27,6 +27,7 @@ services:
     name: task-management-redis
     plan: free
     maxmemoryPolicy: allkeys-lru
+    ipAllowList: []  # Allow all IPs (required by Render)
 
 databases:
   - name: taskmanagement
