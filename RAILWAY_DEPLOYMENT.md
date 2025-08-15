@@ -43,11 +43,28 @@ git push origin master
 3. The Redis URLs will be automatically set
 
 ### **Step 6: Set Environment Variables**
-Railway will automatically set most variables, but you can add:
+Railway will automatically set most variables, but you need to manually set them in the Railway dashboard:
+
+1. Go to your project in Railway dashboard
+2. Click on your app service (not the database or Redis)
+3. Go to the "Variables" tab
+4. Add the following variables:
+
 ```
+# Required variables
+DATABASE_URL=postgresql://postgres:password@hostname:port/railway
+CELERY_BROKER_URL=redis://default:password@hostname:port
+CELERY_RESULT_BACKEND=redis://default:password@hostname:port
+
+# Optional but recommended
 SECRET_KEY=your-secret-key-here
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 ALGORITHM=HS256
+```
+
+> **Important**: You must manually copy the DATABASE_URL and Redis URLs from the respective service's "Connect" tab in the Railway dashboard. The automatic linking may not work properly.
+
+```
 BACKEND_CORS_ORIGINS=*
 ```
 
