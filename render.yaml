@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: task-management-api
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        value: postgresql://postgres:postgres@localhost:5432/taskmanagement
+      - key: CELERY_BROKER_URL
+        value: redis://localhost:6379/0
+      - key: CELERY_RESULT_BACKEND
+        value: redis://localhost:6379/0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 60
+      - key: ALGORITHM
+        value: HS256
+      - key: BACKEND_CORS_ORIGINS
+        value: "*"
+
+  - type: redis
+    name: task-management-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+
+databases:
+  - name: taskmanagement
+    databaseName: taskmanagement
+    user: taskmanagement

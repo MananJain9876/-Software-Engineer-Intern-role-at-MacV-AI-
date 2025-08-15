@@ -1,6 +1,6 @@
 # Task Management System API
 
-A lightweight Task Management System API built with FastAPI, PostgreSQL, and Celery for background jobs.
+A production-ready Task Management System API built with FastAPI, PostgreSQL, and Celery for background jobs.
 
 ## Features
 
@@ -10,223 +10,198 @@ A lightweight Task Management System API built with FastAPI, PostgreSQL, and Cel
 - Send email notifications when tasks are assigned or updated
 - Handle background jobs with Celery workers
 - Daily summary emails for overdue tasks
+- Production-ready with Docker and cloud deployment support
 
 ## Tech Stack
 
-- FastAPI - High-performance web framework
-- PostgreSQL/SQLite - Database options
-- SQLAlchemy ORM - Database ORM
-- Alembic - Database migrations
-- Celery - Background task processing
-- Redis - Message broker for Celery
-- JWT - Authentication
-- Docker - Containerization
+- **FastAPI** - High-performance web framework
+- **PostgreSQL** - Production database
+- **SQLAlchemy ORM** - Database ORM
+- **Alembic** - Database migrations
+- **Celery** - Background task processing
+- **Redis** - Message broker for Celery
+- **JWT** - Authentication
+- **Docker** - Containerization
 
-## Database Schema
+## Quick Start (Local Development)
 
-![Database Schema](db_schema.png)
-
-The database consists of three main tables:
-- **Users**: Stores user information and authentication details
-- **Projects**: Contains project information
-- **Tasks**: Stores task details with references to projects and assigned users
-
-## Setup Instructions
+### Prerequisites
+- Python 3.11+
+- Docker and Docker Compose
+- Redis (optional, will fallback to eager mode)
 
 ### Local Setup
 
 1. **Clone the repository**
-
 ```bash
 git clone <repository-url>
-cd task-management-system
+cd fast
 ```
 
-2. **Create a virtual environment and install dependencies**
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-3. **Set up environment variables**
-
-```bash
-cp .env.example .env
-# Edit .env file with your configuration
-```
-
-4. **Run database migrations**
-
-```bash
-alembic upgrade head
-```
-
-5. **Initialize the database with test data (optional)**
-
-```bash
-python init_db.py
-```
-
-6. **Start the application**
-
-```bash
-uvicorn app.main:app --reload
-```
-
-7. **Install and start Redis (required for Celery)**
-
-```bash
-# macOS with Homebrew
-brew install redis
-brew services start redis
-
-# Ubuntu/Debian
-sudo apt-get install redis-server
-sudo systemctl start redis-server
-```
-
-8. **Start the Celery worker**
-
-```bash
-celery -A app.worker worker --loglevel=info
-```
-
-9. **Start the Celery beat scheduler (for periodic tasks)**
-
-```bash
-celery -A app.worker beat --loglevel=info
-```
-
-### Docker Setup
-
-1. **Build and start the containers**
-
+2. **Using Docker (Recommended)**
 ```bash
 docker-compose up -d --build
 ```
 
-This will start the following services:
-- API server (FastAPI) - http://localhost:8000
-- PostgreSQL database
-- Redis message broker
-- Celery worker
-- Celery beat scheduler
+3. **Manual Setup**
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variables
+export DATABASE_URL="sqlite:///./taskmanagement.db"
+export CELERY_BROKER_URL="redis://localhost:6379/0"
+export CELERY_RESULT_BACKEND="redis://localhost:6379/0"
+
+# Run the application
+uvicorn app.main:app --reload
+```
+
+## Production Deployment
+
+### Render Deployment (Recommended)
+
+1. **Fork/Clone this repository to your GitHub account**
+
+2. **Connect to Render**
+   - Go to [render.com](https://render.com)
+   - Sign up/Login with your GitHub account
+   - Click "New +" and select "Web Service"
+
+3. **Configure the Web Service**
+   - **Name**: `task-management-api`
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Plan**: Free (or choose paid plan for production)
+
+4. **Add Environment Variables**
+   - `DATABASE_URL`: Will be provided by Render PostgreSQL service
+   - `SECRET_KEY`: Generate a secure random string
+   - `CELERY_BROKER_URL`: Will be provided by Render Redis service
+   - `CELERY_RESULT_BACKEND`: Will be provided by Render Redis service
+
+5. **Add PostgreSQL Database**
+   - Click "New +" → "PostgreSQL"
+   - Name: `taskmanagement`
+   - Plan: Free (or choose paid plan for production)
+   - Copy the `DATABASE_URL` to your web service environment variables
+
+6. **Add Redis Service**
+   - Click "New +" → "Redis"
+   - Name: `task-management-redis`
+   - Plan: Free (or choose paid plan for production)
+   - Copy the `REDIS_URL` to your web service environment variables as `CELERY_BROKER_URL` and `CELERY_RESULT_BACKEND`
+
+7. **Deploy**
+   - Click "Create Web Service"
+   - Render will automatically build and deploy your application
+
+### Alternative: One-Click Deploy with render.yaml
+
+If you have the `render.yaml` file in your repository:
+
+1. **Connect to Render**
+2. **Click "New +" → "Blueprint"**
+3. **Connect your GitHub repository**
+4. **Render will automatically create all services based on the blueprint**
+
+### Docker Deployment
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d --build
+
+# Or run individual services
+docker-compose up -d db redis
+docker-compose up -d api
+docker-compose up -d celery-worker celery-beat
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `sqlite:///./taskmanagement.db` |
+| `CELERY_BROKER_URL` | Redis connection string | `redis://localhost:6379/0` |
+| `CELERY_RESULT_BACKEND` | Redis connection string | `redis://localhost:6379/0` |
+| `SECRET_KEY` | JWT secret key | Auto-generated |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token expiry | `60` |
+| `ALGORITHM` | JWT algorithm | `HS256` |
+| `BACKEND_CORS_ORIGINS` | CORS origins | `*` |
 
 ## API Documentation
 
-Once the application is running, you can access the API documentation at:
+Once deployed, access the API documentation at:
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- **Swagger UI**: `https://your-app.onrender.com/docs`
+- **ReDoc**: `https://your-app.onrender.com/redoc`
+- **Health Check**: `https://your-app.onrender.com/health`
 
 ## Authentication
 
 ### Getting an Access Token
 
-To get an access token, make a POST request to `/api/auth/login` with your credentials:
-
 ```bash
-curl -X POST "http://localhost:8000/api/auth/login" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "username=test@example.com&password=password"
-```
-
-The response will contain an access token:
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
+curl -X POST "https://your-app.onrender.com/api/auth/login" \
+     -H "Content-Type: application/x-application/x-www-form-urlencoded" \
+     -d "username=your-email@example.com&password=your-password"
 ```
 
 ### Using the Token
 
-Use the returned token in the Authorization header for subsequent requests:
-
 ```bash
-curl -X GET "http://localhost:8000/api/projects/" \
+curl -X GET "https://your-app.onrender.com/api/projects/" \
      -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-## Celery Worker Setup
+## Database Migrations
 
-The application uses Celery for handling asynchronous tasks and scheduled jobs.
-
-### Task Types
-
-1. **Email Notifications**:
-   - When a task is assigned to a user
-   - When a task's status changes
-
-2. **Scheduled Tasks**:
-   - Daily summary emails of overdue tasks (runs at 8:00 AM)
-
-### Configuration
-
-The Celery worker is configured in `app/worker.py` with the following features:
-
-- **Fault Tolerance**: The worker includes error handling to prevent task failures from affecting the main application
-- **Fallback Mode**: If Redis is unavailable, the worker automatically falls back to "eager mode" (synchronous execution)
-- **Safe Task Execution**: Tasks are wrapped with a `@safe_task` decorator that catches and logs exceptions
-
-### Environment Variables
-
-Celery configuration is controlled by these environment variables in `.env`:
-
-```
-# For local development
-CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-
-# For Docker
-# CELERY_BROKER_URL=redis://redis:6379/0
-# CELERY_RESULT_BACKEND=redis://redis:6379/0
-```
-
-## Sample API Requests
-
-### Create a Project
+For production deployments, run database migrations:
 
 ```bash
-curl -X POST "http://localhost:8000/api/projects/" \
-     -H "Authorization: Bearer YOUR_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{"name": "New Project", "description": "Project description"}'
+# Using Alembic
+alembic upgrade head
+
+# Or using the application (automatic on startup)
+# The app will create tables automatically
 ```
 
-### Create a Task
+## Monitoring and Health Checks
 
-```bash
-curl -X POST "http://localhost:8000/api/tasks/" \
-     -H "Authorization: Bearer YOUR_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{"title": "New Task", "description": "Task description", "project_id": 1, "status": "TODO", "priority": "MEDIUM", "due_date": "2023-12-31"}'
-```
-
-### List Tasks with Filtering and Sorting
-
-```bash
-curl -X GET "http://localhost:8000/api/tasks/?status=TODO&priority=HIGH&sort=due_date&page=1&limit=10" \
-     -H "Authorization: Bearer YOUR_TOKEN"
-```
+- **Health Endpoint**: `/health` - Database connectivity check
+- **Logs**: Available in Render dashboard
+- **Metrics**: Built-in FastAPI metrics
 
 ## Troubleshooting
 
-### Redis Connection Issues
+### Common Issues
 
-If you encounter Redis connection errors:
+1. **Database Connection Errors**
+   - Verify `DATABASE_URL` is correct
+   - Check if PostgreSQL service is running
+   - Ensure database exists and is accessible
 
-1. Ensure Redis is running: `redis-cli ping` should return `PONG`
-2. Check your Redis connection settings in `.env`
-3. The application will continue to function in eager mode, but tasks will run synchronously
+2. **Redis Connection Errors**
+   - Verify `CELERY_BROKER_URL` is correct
+   - Check if Redis service is running
+   - Application will fallback to eager mode if Redis is unavailable
 
-### Database Issues
+3. **Build Failures**
+   - Check Python version compatibility
+   - Verify all dependencies in `requirements.txt`
+   - Check build logs in Render dashboard
 
-If you encounter database connection errors:
+### Support
 
-1. Check your database connection settings in `.env`
-2. For PostgreSQL, ensure the database server is running
-3. For SQLite, ensure the application has write permissions to the database file
+- Check Render logs in the dashboard
+- Verify environment variables are set correctly
+- Test locally with Docker before deploying
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
