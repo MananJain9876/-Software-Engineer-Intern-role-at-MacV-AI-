@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     # Database settings
-    DATABASE_URL: str = "sqlite:///./taskmanagement.db"
+    DATABASE_URL: str = "postgresql://postgres:LYaOHgXWDdGXVQRLClydCStvIKLVRYZx@postgres.railway.internal:5432/railway"
     DATABASE_TEST_URL: Optional[str] = None
 
     # Email settings
@@ -39,8 +39,8 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: Optional[str] = None
 
     # Celery settings
-    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_BROKER_URL: str = "redis://default:VObWwOglbHcPtHKjySnEhwFMFARrCrKa@redis.railway.internal:6379"
+    CELERY_RESULT_BACKEND: str = "redis://default:VObWwOglbHcPtHKjySnEhwFMFARrCrKa@redis.railway.internal:6379"
     
     model_config = {
         "validate_assignment": True,
